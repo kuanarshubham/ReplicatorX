@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:15
+    container_name: pg_logical
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: demo
+    # enable logical WAL and reasonable replication limits
+    command: [
+      "postgres",
+      "-c", "wal_level=logical",
+      "-c", "max_wal_senders=10",
+      "-c", "max_replication_slots=10",
+      "-c", "wal_keep_size=512MB"
+    ]
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d demo"]
+      interval: 5s
+      retries: 10
